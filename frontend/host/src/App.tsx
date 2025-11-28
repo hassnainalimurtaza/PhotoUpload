@@ -2,7 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
 import ToastContainer from './components/ToastContainer';
 import LoadingSpinner from './components/LoadingSpinner';
-import { photoApi } from './api/photoApi';
+import { photoApi, PhotoResponse } from './api/photoApi';
 
 // Upload Component
 const UploadPage: React.FC = () => {
@@ -40,10 +40,9 @@ const UploadPage: React.FC = () => {
     
     setUploading(true);
     try {
-      const formData = new FormData();
-      formData.append('file', file);
-      
-      const response = await photoApi.uploadPhoto(formData);
+      const response = await photoApi.uploadPhoto(file, 'user123', (progress) => {
+        console.log('Upload progress:', progress);
+      });
       alert('Photo uploaded successfully!');
       setFile(null);
     } catch (error) {
@@ -120,7 +119,7 @@ const UploadPage: React.FC = () => {
 
 // Gallery Component
 const GalleryPage: React.FC = () => {
-  const [photos, setPhotos] = useState<any[]>([]);
+  const [photos, setPhotos] = useState<PhotoResponse[]>([]);
   const [loading, setLoading] = useState(true);
 
   React.useEffect(() => {
@@ -129,8 +128,8 @@ const GalleryPage: React.FC = () => {
 
   const loadPhotos = async () => {
     try {
-      const data = await photoApi.getAllPhotos();
-      setPhotos(data);
+      const response = await photoApi.getPhotos('user123', undefined, 0, 50);
+      setPhotos(response.data.content);
     } catch (error) {
       console.error('Failed to load photos:', error);
     } finally {
@@ -172,7 +171,7 @@ const GalleryPage: React.FC = () => {
             <div key={photo.id} className="bg-white rounded-lg shadow-md overflow-hidden">
               <div className="aspect-w-16 aspect-h-9 bg-gray-200">
                 <img
-                  src={photo.fileUrl || '/placeholder.jpg'}
+                  src={photo.thumbnailUrl || photo.storageUrl || '/placeholder.jpg'}
                   alt={photo.originalFileName}
                   className="object-cover w-full h-48"
                 />
