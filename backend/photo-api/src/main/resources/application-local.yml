@@ -1,0 +1,108 @@
+spring:
+  application:
+    name: photo-upload-system
+  
+  # H2 Embedded Database (No PostgreSQL needed)
+  datasource:
+    url: jdbc:h2:mem:photoupload;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password: 
+    driver-class-name: org.h2.Driver
+  
+  # H2 Console for debugging
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  
+  # JPA Configuration
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+        format_sql: true
+  
+  # Flyway - Disabled for H2 with ddl-auto
+  flyway:
+    enabled: false
+  
+  # Redis - Use embedded or skip
+  data:
+    redis:
+      host: localhost
+      port: 6379
+  
+  # Cache - Use simple in-memory cache instead of Redis
+  cache:
+    type: simple
+  
+  # RabbitMQ - Optional for local dev
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+  
+  # Servlet Configuration
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
+      enabled: true
+
+# Server Configuration
+server:
+  port: 8080
+
+# Storage Provider - Use local file system for development
+storage:
+  provider: local
+  local:
+    base-path: ./uploads
+
+# Event Publisher - Use database fallback (no RabbitMQ needed)
+event:
+  publisher: database-fallback
+
+# Processing Configuration
+processing:
+  max-retries: 3
+  retry-backoff-ms: 1000
+
+# Resilience4j Configuration
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        sliding-window-size: 10
+        minimum-number-of-calls: 5
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 30s
+
+# Actuator Configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+  health:
+    rabbit:
+      enabled: false
+    redis:
+      enabled: false
+
+# Logging Configuration
+logging:
+  level:
+    com.photoupload: DEBUG
+    org.springframework: INFO
+    org.hibernate: INFO
+  pattern:
+    console: '%d{yyyy-MM-dd HH:mm:ss} - %msg%n'
+

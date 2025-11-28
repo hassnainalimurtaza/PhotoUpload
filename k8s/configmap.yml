@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: photo-config
+data:
+  database.url: "jdbc:postgresql://postgres-service:5432/photoupload"
+  redis.host: "redis-service"
+  rabbitmq.host: "rabbitmq-service"
+  s3.bucket: "photo-upload-bucket"
+  storage.provider: "s3"
+  event.publisher: "rabbitmq"
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: photo-secrets
+type: Opaque
+stringData:
+  database.username: "postgres"
+  database.password: "postgres"
+  aws.access.key: "your-access-key"
+  aws.secret.key: "your-secret-key"
+
